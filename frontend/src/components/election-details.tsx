@@ -47,7 +47,7 @@ const ElectionDetails = () => {
   const [voteCount, setVoteCount] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const textRef = useRef<HTMLInputElement>(null);
-  const fullUrl = `${window.location.origin}/election/${electionId}/liveview`;
+  const fullUrl = `${API_URL}/election/${electionId}/liveview`;
 
   useEffect(() => {
     //setLivelink(fullUrl);
@@ -82,7 +82,7 @@ const ElectionDetails = () => {
         setElectionData(data);
         setQuestionCount(data?.questions_count || 0);
 
-        const liveLinkWithOrgName = `${fullUrl}?orgname=${encodeURIComponent(
+        const liveLinkWithOrgName = `${API_URL}/election/${electionId}/liveview?orgname=${encodeURIComponent(
           data.orgname
         )}`;
         setLivelink(liveLinkWithOrgName);

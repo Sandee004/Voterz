@@ -22,7 +22,7 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
 mail = Mail(app)
 db = SQLAlchemy(app)
 jwt = JWTManager(app)
-CORS(app)
+CORS(app, origins=["https://voterz-pyg4.onrender.com", "http://localhost:3000"])
 
 
 class Users(db.Model):
