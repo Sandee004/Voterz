@@ -41,11 +41,13 @@ const LiveVote: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await fetch(`${API_URL}/api/live/${electionId}`);
+        console.log("Got data i believe");
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || "Failed to fetch election data");
         }
         const data: ElectionData = await response.json();
+        console.log(data);
         setOrgname(data.orgname);
         setElectionTitle(data.election.title);
         setQuestions(
