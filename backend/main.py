@@ -360,7 +360,8 @@ def liveview():
 
 @app.route('/api/live', methods=['GET'])
 def live_election():
-    election_id = request.args.get('id')
+    #election_id = request.args.get('id')
+    election_id = request.args.get('electionId')
     if not election_id:
         return jsonify({"message": "Election ID is required"}), 400
     

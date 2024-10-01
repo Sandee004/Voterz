@@ -44,7 +44,12 @@ const LiveVote: React.FC = () => {
         console.log("Got data i believe");
         if (!response.ok) {
           const errorData = await response.json();
+          console.log(errorData);
           throw new Error(errorData.message || "Failed to fetch election data");
+        }
+        if (response.status == 400) {
+          const statusText = await response.json();
+          console.log(statusText);
         }
         const data: ElectionData = await response.json();
         console.log(data);
