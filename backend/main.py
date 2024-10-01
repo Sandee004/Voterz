@@ -5,8 +5,6 @@ from flask_mail import Message, Mail
 from flask_cors import CORS
 #from dotenv import load_dotenv
 from datetime import timedelta, datetime, timezone
-import random
-import string
 import bcrypt
 import os
 import secrets
