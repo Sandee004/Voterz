@@ -358,18 +358,18 @@ def liveview():
 """
 
 
-@app.route('/api/live/<election_id>', methods=['GET'])
-def live_election(election_id):
-    election = Elections.query.get(election_id)
+@app.route('/api/live', methods=['GET'])
+def live_election():
+    election_id = request.args.get('id')
+    if not election_id:
+        return jsonify({"message": "Election ID is required"}), 400
     
+    print(f"Fetching election with ID: {election_id}")  # Debug line
+    
+    election = Elections.query.get(election_id)
     if not election:
         return jsonify({"message": "Election not found"}), 404
     
-    # Check if election is active
-    now = datetime.now(timezone.utc)
-    if not election.is_built or election.current_status != "active":
-        return jsonify({"message": "This election is not currently active"}), 403
-
     user = Users.query.get(election.user_id)
     questions = Questions.query.filter_by(election_id=election_id).all()
 
@@ -391,6 +391,10 @@ def live_election(election_id):
 
     return jsonify(election_data), 200
 
+# Add a catch-all route for the frontend paths
+@app.route('/election/<path:path>')
+def catch_all(path):
+    return render_template('index.html')
 
 @app.route('/api/submit_ballot', methods=['POST'])
 def submit_ballot():
