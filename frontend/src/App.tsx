@@ -33,8 +33,8 @@ const App = () => {
           element={<ThanksPreview />}
         />
         <Route path="/election/:electionId/results" element={<Results />} />
-        {/*<Route path="/election/:electionId/liveview" element={<LiveVote />} />*/}
-        <Route path="/election/:electionId/vote" element={<LiveVote />} />
+        <Route path="/election/:electionId/liveview" element={<LiveVote />} />
+        {/*<Route path="/election/:electionId/vote" element={<LiveVote />} />*/}
       </Routes>
     </Router>
   );
