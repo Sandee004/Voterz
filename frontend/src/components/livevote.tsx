@@ -43,7 +43,7 @@ const LiveVote: React.FC = () => {
         const response = await fetch(
           `${API_URL}/api/live?electionId=${electionId}`
         );
-        console.log("Got data i believe");
+
         if (!response.ok) {
           const errorData = await response.json();
           console.log(errorData);
@@ -113,7 +113,7 @@ const LiveVote: React.FC = () => {
         throw new Error(errorData.message || "Failed to submit ballot");
       }
 
-      navigate(`/election/${electionId}/thanks`);
+      navigate(`/thanks`);
     } catch (error) {
       console.error("Error submitting ballot:", error);
       alert(error instanceof Error ? error.message : "Failed to submit ballot");
@@ -123,7 +123,7 @@ const LiveVote: React.FC = () => {
   return (
     <div className="max-w-2xl mx-auto p-4">
       {isLoading && <Loader />}
-      <div className="bg-blue-500 text-white p-4 rounded-lg shadow-md mb-6">
+      <div className="bg-green-500 text-white p-4 rounded-lg shadow-md mb-6">
         <h1 className="text-2xl font-bold text-center">{orgName}</h1>
         <h2 className="text-xl text-center mt-2">{electionTitle}</h2>
       </div>
@@ -156,7 +156,7 @@ const LiveVote: React.FC = () => {
                         onChange={(e) =>
                           handleOptionChange(question.id, e.target.value)
                         }
-                        className="form-radio h-5 w-5 text-blue-600"
+                        className="form-radio h-5 w-5 text-green-600"
                       />
                       <span className="text-gray-700">{optionText}</span>
                     </label>
@@ -169,7 +169,7 @@ const LiveVote: React.FC = () => {
 
       <button
         onClick={submitBallot}
-        className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+        className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
       >
         Submit Ballot
       </button>

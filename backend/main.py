@@ -322,45 +322,8 @@ def preview():
     return jsonify(user_info), 200
 
 
-"""
-@app.route('/api/liveview', methods=['GET'])
-def liveview():
-    election_id = request.args.get('electionId')
-    if not election_id:
-        return jsonify({"message": "Election ID is required"}), 400
-
-    election = Elections.query.filter_by(id=election_id).first()
-    if not election:
-        return jsonify({"message": "Election not found or unauthorized"}), 404
-    
-    if election.status == "ended":
-        return jsonify({"message": "Election has ended"}), 403
-
-    questions = Questions.query.filter_by(election_id=election_id).all()
-
-    user_info = {
-        "election": {
-            "id": election.id,
-            "title": election.title,
-            "status": election.status,
-            "questions": [
-                {
-                    "id": q.id,
-                    "question_text": q.question_text,
-                    "question_type": q.question_type,
-                    "options": q.options
-                } for q in questions
-            ]
-        }
-    }
-
-    return jsonify(user_info), 200
-"""
-
-
 @app.route('/api/live', methods=['GET'])
 def live_election():
-    #election_id = request.args.get('id')
     election_id = request.args.get('electionId')
     if not election_id:
         return jsonify({"message": "Election ID is required"}), 400
@@ -379,6 +342,7 @@ def live_election():
         "election": {
             "id": election.id,
             "title": election.title,
+            "status": election.status,
             "questions": [
                 {
                     "id": q.id,

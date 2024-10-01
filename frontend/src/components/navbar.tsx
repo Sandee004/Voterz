@@ -27,13 +27,9 @@ const Navbar = () => {
             transition={{ duration: 0.3 }}
             className="fixed top-[49px] left-0 right-0 z-40 bg-green-500 flex flex-col pl-8 py-4"
           >
-            <Link className="py-2 hover:font-bold w-[80%]" to="/">
-              Home
+            <Link className="py-2 hover:font-bold w-[80%]" to="/dashboard">
+              Dashboard
             </Link>
-            <Link className="py-2 hover:font-bold w-[80%]" to="/favourites">
-              Favourites
-            </Link>
-            <Link to="/login">Login</Link>
           </motion.div>
         )}
       </AnimatePresence>
