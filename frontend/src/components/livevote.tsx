@@ -40,7 +40,9 @@ const LiveVote: React.FC = () => {
     const getElectionInfo = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`${API_URL}/api/live/${electionId}`);
+        const response = await fetch(
+          `${API_URL}/api/live?electionId=${electionId}`
+        );
         console.log("Got data i believe");
         if (!response.ok) {
           const errorData = await response.json();
