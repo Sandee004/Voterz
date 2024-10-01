@@ -11,6 +11,7 @@ import Thanks from "./components/thanks";
 import Results from "./components/results";
 import Liveview from "./components/live-view";
 import ThanksPreview from "./components/thanks-preview";
+import LiveVote from "./components/liveview";
 
 const App = () => {
   return (
@@ -34,6 +35,7 @@ const App = () => {
         />
         <Route path="/election/:electionId/results" element={<Results />} />
         <Route path="/election/:electionId/liveview" element={<Liveview />} />
+        <Route path="/election/:electionId/vote" element={<LiveVote />} />
       </Routes>
     </Router>
   );

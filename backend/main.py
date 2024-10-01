@@ -322,6 +322,7 @@ def preview():
     return jsonify(user_info), 200
 
 
+"""
 @app.route('/api/liveview', methods=['GET'])
 def liveview():
     election_id = request.args.get('electionId')
@@ -354,6 +355,41 @@ def liveview():
     }
 
     return jsonify(user_info), 200
+"""
+
+
+@app.route('/api/live/<election_id>', methods=['GET'])
+def live_election(election_id):
+    election = Elections.query.get(election_id)
+    
+    if not election:
+        return jsonify({"message": "Election not found"}), 404
+    
+    # Check if election is active
+    now = datetime.now(timezone.utc)
+    if not election.is_built or election.current_status != "active":
+        return jsonify({"message": "This election is not currently active"}), 403
+
+    user = Users.query.get(election.user_id)
+    questions = Questions.query.filter_by(election_id=election_id).all()
+
+    election_data = {
+        "orgname": user.orgname,
+        "election": {
+            "id": election.id,
+            "title": election.title,
+            "questions": [
+                {
+                    "id": q.id,
+                    "question_text": q.question_text,
+                    "question_type": q.question_type,
+                    "options": q.options
+                } for q in questions
+            ]
+        }
+    }
+
+    return jsonify(election_data), 200
 
 
 @app.route('/api/submit_ballot', methods=['POST'])
