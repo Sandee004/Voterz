@@ -18,7 +18,7 @@ mimetypes.add_type('text/css', '.css')
 app = Flask(__name__, static_folder='dist', static_url_path='', template_folder='dist')
 app.config["JWT_SECRET_KEY"] = "fish"
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
-MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://oyarekhuatomisin:jaoxQyxNLyYBKLVJ@cluster0.fgryx.mongodb.net/voting_app?retryWrites=true&w=majority')
+MONGODB_URI = os.getenv('MONGODB_URI')
 client = MongoClient(MONGODB_URI)
 db = client['voting_app']
 users_collection = db['voterz']
@@ -106,34 +106,36 @@ def serve_static(path):
 
 @app.route("/api/signup", methods=["POST"])
 def signup():
-    username = request.json.get("username")
-    email = request.json.get("email")
-    password = request.json.get("password")
-    orgtype = request.json.get("type")
-    orgname = request.json.get("orgname")
-    
-    if not username or not email or not password or not orgtype or not orgname:
-        return jsonify({"message":"Fill all fields"}), 400
-    
-    if db.users.find_one({"email": email}):
-        return jsonify({"message": "Email is already in use"}), 400
-    
-    """#new_user = Users(username=username, email=email, orgtype=orgtype, orgname=orgname)
-    #new_user.set_password(password)
-    #new_user = Users(username=username, email=email, password=password, orgtype=orgtype)
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({"message": "User created successfully"}), 201"""
-
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-    new_user = {
-        "username": username,
-        "email": email,
-        "password": hashed_password,
-        "orgtype": orgtype,
-        "orgname": orgname
-    }
-    db.users.insert_one(new_user)
+    try:
+        username = request.json.get("username")
+        email = request.json.get("email")
+        password = request.json.get("password")
+        orgtype = request.json.get("type")
+        orgname = request.json.get("orgname")
+        
+        if not username or not email or not password or not orgtype or not orgname:
+            return jsonify({"message":"Fill all fields"}), 400
+        
+        if db.users.find_one({"email": email}):
+            return jsonify({"message": "Email is already in use"}), 400
+        
+        hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+        new_user = {
+            "username": username,
+            "email": email,
+            "password": hashed_password,
+            "orgtype": orgtype,
+            "orgname": orgname
+        }
+        result = db.users.insert_one(new_user)
+        
+        if result.inserted_id:
+            return jsonify({"message": "User created successfully", "user_id": str(result.inserted_id)}), 201
+        else:
+            return jsonify({"message": "Failed to create user"}), 500
+    except Exception as e:
+        print(f"Error in signup: {str(e)}")
+        return jsonify({"message": "An error occurred during signup", "error": str(e)}), 500
     
 
 @app.route("/api/login", methods=["POST", "GET"])
