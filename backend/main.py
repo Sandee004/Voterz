@@ -319,8 +319,10 @@ def preview():
 
     return jsonify(user_info), 200
 
+
 @app.route('/api/live', methods=['GET'])
 def live_election():
+    #election_id = request.args.get('id')
     election_id = request.args.get('electionId')
     if not election_id:
         return jsonify({"message": "Election ID is required"}), 400
@@ -337,9 +339,9 @@ def live_election():
     election_data = {
         "orgname": user['orgname'],
         "election": {
-            "id": election['_id'],
-            "title": election['title'],
-            "status": get_election_status(election),
+            "id": election.id,
+            "title": election.title,
+            "status": election.status,
             "questions": [
                 {
                     "id": str(q['_id']),

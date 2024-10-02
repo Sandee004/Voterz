@@ -50,8 +50,10 @@ const ElectionDetails = () => {
   const fullUrl = `${API_URL}/election/${electionId}/liveview`;
 
   useEffect(() => {
+    //setLivelink(fullUrl);
     const fetchElectionDetails = async () => {
       if (!electionId) return;
+
       setIsLoading(true);
       const token = localStorage.getItem("token");
       if (!token) {
@@ -279,8 +281,7 @@ const ElectionDetails = () => {
               <p>
                 After setting up and adding questions, build to make it active
                 for people to vote. After building, questions cannot be added or
-                edited, the voting link to share would also become accessible.
-                Cheers!
+                edited.
               </p>
             </div>
 

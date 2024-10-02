@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Loader from "./loader";
 import { API_URL } from "../config";
 
@@ -22,66 +22,90 @@ interface Election {
   questions: Question[];
 }
 
-interface ElectionData {
+interface UserInfo {
+  id: number;
+  username: string;
+  email: string;
+  orgtype: string;
   orgname: string;
   election: Election;
 }
 
-const LiveVote: React.FC = () => {
+interface Response {
+  question_id: number;
+  answer: string;
+}
+
+const Liveview: React.FC = () => {
   const [orgName, setOrgname] = useState<string | null>(null);
   const [electionTitle, setElectionTitle] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [responses, setResponses] = useState<Response[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { electionId } = useParams();
   const navigate = useNavigate();
-  const [responses, setResponses] = useState<{ [key: number]: string }>({});
+  const location = useLocation();
 
   useEffect(() => {
-    const getElectionInfo = async () => {
+    const searchParams = new URLSearchParams(location.search);
+    const orgnameParam = searchParams.get("orgname");
+
+    if (orgnameParam) {
+      setOrgname(orgnameParam);
+    }
+  }, [location]);
+
+  useEffect(() => {
+    const getUserInfo = async () => {
       setIsLoading(true);
+      const url = `${API_URL}/api/liveview?electionId=${electionId}`;
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
       try {
-        const response = await fetch(
-          `${API_URL}/api/live?electionId=${electionId}`
-        );
-        console.log("Got data i believe");
+        const response = await fetch(url, options);
         if (!response.ok) {
-          const errorData = await response.json();
-          console.log(errorData);
-          throw new Error(errorData.message || "Failed to fetch election data");
+          throw new Error("Failed to fetch election data");
         }
-        if (response.status == 400) {
-          const statusText = await response.json();
-          console.log(statusText);
-        }
-        const data: ElectionData = await response.json();
-        console.log(data);
-        setOrgname(data.orgname);
+        const data: UserInfo = await response.json();
         setElectionTitle(data.election.title);
+
         setQuestions(
           data.election.questions.map((q) => ({
             ...q,
             answered: false,
           }))
         );
+        //setQuestions(data.election.questions);
       } catch (error) {
-        console.error("Error fetching election data:", error);
-        alert(error instanceof Error ? error.message : "An error occurred");
+        const myError = error as { message: string };
+        console.error("Error message:", myError.message);
+        alert(myError.message);
       } finally {
         setIsLoading(false);
       }
     };
-    getElectionInfo();
+    getUserInfo();
   }, [electionId]);
 
   const handleOptionChange = (questionId: number, answer: string) => {
-    setResponses((prev) => ({
-      ...prev,
-      [questionId]: answer,
-    }));
-    setQuestions((prevQuestions) =>
-      prevQuestions.map((q) =>
-        q.id === questionId ? { ...q, answered: true } : q
-      )
+    setResponses((prevResponses) => {
+      const existingResponseIndex = prevResponses.findIndex(
+        (r) => r.question_id === questionId
+      );
+      if (existingResponseIndex !== -1) {
+        return prevResponses.map((r) =>
+          r.question_id === questionId ? { ...r, answer } : r
+        );
+      } else {
+        return [...prevResponses, { question_id: questionId, answer }];
+      }
+    });
+    setQuestions(
+      questions.map((q) => (q.id === questionId ? { ...q, answered: true } : q))
     );
   };
 
@@ -93,37 +117,46 @@ const LiveVote: React.FC = () => {
       return;
     }
 
+    const data = {
+      election_id: electionId,
+      responses: responses,
+    };
+
+    const url = `${API_URL}/api/submit_ballot`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        //Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    };
+
     try {
-      const response = await fetch(`${API_URL}/api/submit_ballot`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          election_id: electionId,
-          responses: Object.entries(responses).map(([questionId, answer]) => ({
-            question_id: parseInt(questionId),
-            answer,
-          })),
-        }),
-      });
-
+      const response = await fetch(url, options);
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to submit ballot");
+        if (response.status === 400) {
+          // Handle 400 error specifically
+          const errorData = await response.json();
+          throw new Error(errorData.message);
+        } else {
+          throw new Error("Failed to submit ballot");
+        }
       }
-
-      navigate(`/election/${electionId}/thanks`);
+      const result = await response.json();
+      console.log(result.message);
+      navigate("/thanks");
     } catch (error) {
-      console.error("Error submitting ballot:", error);
-      alert(error instanceof Error ? error.message : "Failed to submit ballot");
+      const myError = error as { message: string };
+      console.error("Error message:", myError.message);
+      alert(myError.message);
     }
   };
 
   return (
     <div className="max-w-2xl mx-auto p-4">
       {isLoading && <Loader />}
-      <div className="bg-blue-500 text-white p-4 rounded-lg shadow-md mb-6">
+      <div className="bg-green-500 text-white p-4 rounded-lg shadow-md mb-6">
         <h1 className="text-2xl font-bold text-center">{orgName}</h1>
         <h2 className="text-xl text-center mt-2">{electionTitle}</h2>
       </div>
@@ -156,7 +189,7 @@ const LiveVote: React.FC = () => {
                         onChange={(e) =>
                           handleOptionChange(question.id, e.target.value)
                         }
-                        className="form-radio h-5 w-5 text-blue-600"
+                        className="form-radio h-5 w-5 text-green-600"
                       />
                       <span className="text-gray-700">{optionText}</span>
                     </label>
@@ -168,8 +201,9 @@ const LiveVote: React.FC = () => {
       ))}
 
       <button
+        type="submit"
         onClick={submitBallot}
-        className="w-full bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+        className="w-full bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600 transition duration-300"
       >
         Submit Ballot
       </button>
@@ -177,4 +211,4 @@ const LiveVote: React.FC = () => {
   );
 };
 
-export default LiveVote;
+export default Liveview;
