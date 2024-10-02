@@ -113,7 +113,7 @@ const LiveVote: React.FC = () => {
         throw new Error(errorData.message || "Failed to submit ballot");
       }
 
-      navigate(`/election/${electionId}/thanks`);
+      navigate(`/thanks`);
     } catch (error) {
       console.error("Error submitting ballot:", error);
       alert(error instanceof Error ? error.message : "Failed to submit ballot");
