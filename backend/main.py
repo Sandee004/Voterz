@@ -16,10 +16,9 @@ from bson import ObjectId
 mimetypes.add_type('application/javascript', '.js')
 mimetypes.add_type('text/css', '.css')
 app = Flask(__name__, static_folder='dist', static_url_path='', template_folder='dist')
-app.config["JWT_SECRET_KEY"] = "fish"
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
-MONGODB_URI = os.getenv("MONGODB_URI", 'mongodb+srv://oyarekhuatomisin:oTZbYVPe37JcS9Xy@cluster0.ghcr8.mongodb.net/voting_app?retryWrites=true&w=majority')
-#MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb+srv://oyarekhuatomisin:jaoxQyxNLyYBKLVJ@cluster0.fgryx.mongodb.net/user_database?retryWrites=true&w=majority')
+MONGODB_URI = os.getenv("MONGODB_URI")
 client = MongoClient(MONGODB_URI)
 db = client['voting_app']
 users_collection = db['users']
