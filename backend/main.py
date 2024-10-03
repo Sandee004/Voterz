@@ -43,7 +43,7 @@ def get_election_status(election):
     elif now < start:
         return "Upcoming"
     elif start <= now <= end:
-        return "Ongoing"
+        return "Active"
     else:
         return "Ended"
 
@@ -339,7 +339,6 @@ def submit_ballot():
         return jsonify({"message": "Election not found"}), 404
 
     voter_ip = request.remote_addr
-    print(voter_ip)
 
     # Check if this IP has already voted in this election
     existing_vote = db.responses.find_one({"election_id": election_id, "voter_ip": voter_ip})
@@ -464,9 +463,6 @@ def build_election():
         "message": "Election built successfully",
         "status": status
     }), 200
-    #print(f'Election {election_id} has been built and set active')
-
-    #return jsonify({"message": "Election built successfully"}), 200
 
 
 # Add a catch-all route for the frontend paths
