@@ -50,7 +50,6 @@ const ElectionDetails = () => {
   const fullUrl = `${API_URL}/election/${electionId}/liveview`;
 
   useEffect(() => {
-    //setLivelink(fullUrl);
     const fetchElectionDetails = async () => {
       if (!electionId) return;
 
@@ -79,7 +78,7 @@ const ElectionDetails = () => {
         }
 
         const data = await response.json();
-        setElectionData(data);
+        setElectionData({ ...data, status: data.status || "unknown" });
         setQuestionCount(data?.questions_count || 0);
 
         const liveLinkWithOrgName = `${API_URL}/election/${electionId}/liveview?orgname=${encodeURIComponent(
@@ -191,11 +190,6 @@ const ElectionDetails = () => {
       window.open(url.toString(), "_blank");
     }
   };
-  /*const liveClick = () => {
-    if (electionId && electionData) {
-      navigate(`/election/${electionId}/liveview`);
-    }
-  };*/
 
   const handleCopy = async () => {
     if (textRef.current && electionData?.is_built) {
@@ -229,7 +223,7 @@ const ElectionDetails = () => {
     }
 
     switch (electionData.status) {
-      case "active":
+      case "ongoing":
         return (
           <button
             title="Election is active"
@@ -247,6 +241,16 @@ const ElectionDetails = () => {
             disabled={true}
           >
             Ended
+          </button>
+        );
+      case "upcoming":
+        return (
+          <button
+            title="Election is upcoming"
+            className="bg-yellow-500 text-white py-1 px-3"
+            disabled={true}
+          >
+            Building
           </button>
         );
       default:

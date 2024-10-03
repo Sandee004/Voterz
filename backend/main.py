@@ -418,11 +418,19 @@ def build_election():
     # Build the election (implement your logic here)
     db.elections.update_one(
         {"_id": election_id},
-        {"$set": {"is_built": True, "status": get_election_status(election)}}
+        {"$set": {"is_built": True}}
     )
-    print(f'Election {election_id} has been built and set active')
 
-    return jsonify({"message": "Election built successfully"}), 200
+    updated_election = db.elections.find_one({"_id": election_id})
+    status = get_election_status(updated_election)
+    
+    return jsonify({
+        "message": "Election built successfully",
+        "status": status
+    }), 200
+    #print(f'Election {election_id} has been built and set active')
+
+    #return jsonify({"message": "Election built successfully"}), 200
 
 
 # Add a catch-all route for the frontend paths
