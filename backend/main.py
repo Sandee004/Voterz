@@ -141,7 +141,26 @@ def election():
 
             if not election:
                 return jsonify({"message": "Election not found or unauthorized"}), 404
-        
+
+            now = datetime.now(timezone.utc)
+            end_date = election['endDate']
+            if end_date.tzinfo is None:
+                end_date = end_date.replace(tzinfo=timezone.utc)
+            
+            if election['is_built']:
+                if now > end_date:
+                    status = "Ended"
+                else:
+                    status = "Active"
+                
+                # Update status if it has changed
+                if status != election.get('status'):
+                    db.elections.update_one(
+                        {"_id": election_id},
+                        {"$set": {"status": status}}
+                    )
+                    election['status'] = status
+
             questions = list(db.questions.find({"election_id": election_id}))
             return jsonify({
                     'id': election['_id'],
@@ -304,6 +323,7 @@ def live_election():
 
     return jsonify(election_data), 200
 
+
 @app.route('/api/submit_ballot', methods=['POST'])
 def submit_ballot():
     data = request.json
@@ -330,6 +350,11 @@ def submit_ballot():
     for response in responses:
         question_id = response.get('question_id')
         answer = response.get('answer')
+
+        # Convert question_id to ObjectId if it's stored that way in your database
+        if isinstance(question_id, str):
+            question_id = ObjectId(question_id)
+        
         new_response = {
             "election_id": election_id,
             "question_id": question_id,
@@ -394,6 +419,7 @@ def get_results():
 
     return jsonify(user_info), 200
 
+
 @app.route('/api/build', methods=['POST'])
 @jwt_required()
 def build_election():
@@ -414,6 +440,16 @@ def build_election():
     if election['is_built']:
         print("I've built it already naw")
         return jsonify({"message": "Election is already built"}), 400
+
+    now = datetime.now(timezone.utc)
+    end_date = election['endDate']
+    if end_date.tzinfo is None:
+        end_date = end_date.replace(tzinfo=timezone.utc)
+    
+    if now > end_date:
+        status = "Ended"
+    else:
+        status = "Active"
 
     # Build the election (implement your logic here)
     db.elections.update_one(

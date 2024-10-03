@@ -223,7 +223,7 @@ const ElectionDetails = () => {
     }
 
     switch (electionData.status) {
-      case "ongoing":
+      case "Active":
         return (
           <button
             title="Election is active"
