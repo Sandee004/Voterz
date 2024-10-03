@@ -223,7 +223,7 @@ const ElectionDetails = () => {
     }
 
     switch (electionData.status) {
-      case "ongoing":
+      case "active":
         return (
           <button
             title="Election is active"
@@ -241,16 +241,6 @@ const ElectionDetails = () => {
             disabled={true}
           >
             Ended
-          </button>
-        );
-      case "upcoming":
-        return (
-          <button
-            title="Election is upcoming"
-            className="bg-yellow-500 text-white py-1 px-3"
-            disabled={true}
-          >
-            Building
           </button>
         );
       default:
